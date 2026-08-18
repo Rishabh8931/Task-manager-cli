@@ -9,6 +9,9 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc"
   },
+  "bin": {
+    "task": "./dist/index.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
