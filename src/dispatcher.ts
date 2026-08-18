@@ -1,3 +1,5 @@
+import { addCommand } from "./commands/add.js";
+
 export function dispatch(args: string[]): void {
   const command = args[0];
 
@@ -23,7 +25,7 @@ Options:
 
   switch (command) {
     case "add":
-      console.log("Adding item...");
+      addCommand(args[1]);
       break;
     case "update":
       console.log("Updating item...");
