@@ -33,3 +33,13 @@ Explain how the CLI identifies and routes commands.
 - list
 - mark-in-progress
 - mark-done
+
+add <description>
+
+CLI Entry Point <br>
+↓ <br>
+Dispatcher<br>
+↓<br>
+Add Command<br>
+↓<br>
+Input Validation<br>
