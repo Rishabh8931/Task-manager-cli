@@ -1,4 +1,5 @@
 import { type Task } from "../domain/task.js";
+import { taskService } from "../applcation/task.service.js";
 
 export function addCommand(task: string | undefined): void {
   if (!task || task.trim() === "") {
@@ -7,15 +8,7 @@ export function addCommand(task: string | undefined): void {
     return;
   }
 
-  const now = new Date().toISOString();
-
-  const newTask: Task = {
-    id: 1,
-    description: task,
-    status: "todo",
-    createdAt: now,
-    updatedAt: now,
-  };
+  const newTask: Task = taskService.createTask(task.trim());
 
   console.log(newTask);
 }

@@ -23,6 +23,8 @@ Command Dispatcher
       ↓
 Command Handler
       ↓
+Task Service
+      ↓
 Task Domain
 ---
 
