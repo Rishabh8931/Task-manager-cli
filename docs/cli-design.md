@@ -1,45 +1,22 @@
 # CLI Design
 
-## Execution Flow
+## Command Pipeline
 
-Describe how:
+A command follows this general flow:
 
-task add "Learn TypeScript"
-
-travels from the shell to the application.
-
-## Arguments
-
-Explain the role of process.argv.
-
-## Executable
-
-Explain how package.json `bin` exposes the `task`
-command.
-
-## Shebang
-
-Explain why the Node.js entry file uses a shebang.
-
-## Command Dispatch
-
-Explain how the CLI identifies and routes commands.
-
-## Current Commands
-
-- add
-- update
-- delete
-- list
-- mark-in-progress
-- mark-done
-
-add <description>
-
-CLI Entry Point <br>
-↓ <br>
-Dispatcher<br>
-↓<br>
-Add Command<br>
-↓<br>
-Input Validation<br>
+```text
+User
+ ↓
+Shell
+ ↓
+Node.js process
+ ↓
+process.argv
+ ↓
+CLI entry point
+ ↓
+Dispatcher
+ ↓
+Command handler
+ ↓
+Application service
