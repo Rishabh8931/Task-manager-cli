@@ -1,7 +1,11 @@
 import type { Task } from "../domain/task.js";
+import type { TaskRepository } from "../repositories/task-repositry.js";
+import { MemoryTaskRepository } from "../repositories/Memory-repository.js";
 
 class TaskService {
-  createTask(description: string): Task {
+  constructor(private taskRepository: TaskRepository) {}
+
+  async createTask(description: string): Promise<Task> {
     const now = new Date().toISOString();
     const newTask: Task = {
       id: Math.floor(Math.random() * 1000), // Generate a random ID for demonstration purposes
@@ -10,8 +14,11 @@ class TaskService {
       createdAt: now,
       updatedAt: now,
     };
+    await this.taskRepository.create(newTask);
     return newTask;
   }
 }
 
-export const taskService = new TaskService();
+const taskRepository = new MemoryTaskRepository();
+
+export const taskService = new TaskService(taskRepository);
