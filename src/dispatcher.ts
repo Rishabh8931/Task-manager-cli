@@ -1,6 +1,6 @@
 import { addCommand } from "./commands/add.js";
 
-export function dispatch(args: string[]): void {
+export async function dispatch(args: string[]): Promise<void> {
   const command = args[0];
 
   function showHelp() {
@@ -25,7 +25,7 @@ Options:
 
   switch (command) {
     case "add":
-      addCommand(args[1]);
+      await addCommand(args[1]);
       break;
     case "update":
       console.log("Updating item...");
