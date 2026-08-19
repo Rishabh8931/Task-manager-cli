@@ -1,49 +1,49 @@
-task add "Learn TypeScript"<br>
-│
-▼
-process.argv<br>
-│
-▼
-index.ts<br>
-│
-▼
-dispatcher<br>
-│
-▼
-addCommand()<br>
-│
-▼
-validation<br>
+# Architecture
+
+Task CLI follows a layered architecture where the terminal interface,
+application logic, domain model, and persistence are separated.
+
+## Current Architecture
+
+```text
+                    User
+                     │
+                     ▼
+                Terminal / CLI
+                     │
+                     ▼
+                 index.ts
+                     │
+                     ▼
+                Dispatcher
+                     │
+                     ▼
+              Command Handler
+                     │
+                     ▼
+                TaskService
+                     │
+                     ▼
+              TaskRepository
+                     │
+              ┌──────┴──────┐
+              ▼             ▼
+      MemoryTaskRepository  JsonTaskRepository
+              │             │
+              ▼             ▼
+             RAM        Local JSON file
+
+```
 ---
 
-## flow
-CLI Entry Point
-      ↓
-Command Dispatcher
-      ↓
-Command Handler
-      ↓
-Task Service
-      ↓
-Task Domain
----
+# Layers
 
+- CLI / Presentation Layer:<br>
+    The CLI is responsible for interacting with the user.<br>
+    Responsibilities include:
+    - Reading command-line arguments
+    - Dispatching commands
+    - Validating command-specific input
+    - Displaying results and errors
+    The CLI should not directly manage persistent task data.
 
-      Task Domain
-
-The task domain represents the core concept of the application.
-It is independent of the CLI and storage implementation.
-
-Task:
-
-- id
-- description
-- status
-- createdAt
-- updatedAt
-
-Valid statuses:
-
-- todo
-- in-progress
-- done
