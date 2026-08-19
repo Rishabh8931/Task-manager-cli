@@ -1,6 +1,7 @@
 import type { Task } from "../domain/task.js";
 import type { TaskRepository } from "../repositories/task-repositry.js";
 import { MemoryTaskRepository } from "../repositories/Memory-repository.js";
+import { JsonTaskRepository } from "../repositories/Json-task-repository.js";
 
 class TaskService {
   constructor(private taskRepository: TaskRepository) {}
@@ -19,6 +20,6 @@ class TaskService {
   }
 }
 
-const taskRepository = new MemoryTaskRepository();
+const taskRepository = new JsonTaskRepository();
 
 export const taskService = new TaskService(taskRepository);
