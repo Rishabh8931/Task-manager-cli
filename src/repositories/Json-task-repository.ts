@@ -2,7 +2,7 @@ import envPaths from "env-paths";
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import { type Task } from "../domain/task.js";
+import { isTask, type Task } from "../domain/task.js";
 import { type TaskRepository } from "./task-repositry.js";
 
 export class JsonTaskRepository implements TaskRepository {
@@ -29,7 +29,18 @@ export class JsonTaskRepository implements TaskRepository {
   async getAll(): Promise<Task[]> {
     try {
       const content = await fs.readFile(this.filePath, "utf-8");
-      return JSON.parse(content) as Task[];
+
+      const data: unknown = JSON.parse(content);
+
+      if (!Array.isArray(data)) {
+        throw new Error("Task storage must contain an array.");
+      }
+
+      if (!data.every(isTask)) {
+        throw new Error("Task storage contains invalid task data.");
+      }
+
+      return data;
     } catch (error) {
       if (isFileNotFoundError(error)) {
         return [];
