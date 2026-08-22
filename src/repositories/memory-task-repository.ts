@@ -1,5 +1,5 @@
 import type { Task } from "../domain/task.js";
-import type { TaskRepository } from "./task-repositry.js";
+import type { TaskRepository } from "./task-repository.js";
 
 export class MemoryTaskRepository implements TaskRepository {
   private tasks: Task[] = [];
