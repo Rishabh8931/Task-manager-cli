@@ -1,29 +1,32 @@
+import chalk from "chalk";
 import { addCommand } from "./commands/add.js";
 import { listCommand } from "./commands/list.js";
 import { updateCommand } from "./commands/update.js";
 import { deleteCommand } from "./commands/delete.js";
 import { markCommand } from "./commands/mark.js";
+import { interactiveMenu } from "./commands/interactive.js";
 
 export async function dispatch(args: string[]): Promise<void> {
   const command = args[0];
 
   function showHelp() {
     console.log(`
-Task CLI
+${chalk.bgCyan.black.bold(" TASK CLI ")} ${chalk.gray("v1.0.0")}
 
-Usage:
-  task <command> [arguments]
+${chalk.bold("USAGE:")}
+  ${chalk.cyan("task")} ${chalk.yellow("<command>")} ${chalk.gray("[arguments]")}
+  ${chalk.cyan("task")}                       ${chalk.gray("(Launches interactive dashboard)")}
 
-Commands:
-  add <description>                 Add a new task
-  update <id> <description>         Update task description
-  delete <id>                       Delete a task
-  list [todo|in-progress|done]      List tasks (optionally filtered by status)
-  mark-in-progress <id>             Mark a task as in-progress
-  mark-done <id>                    Mark a task as done
+${chalk.bold("COMMANDS:")}
+  ${chalk.yellow("add")} ${chalk.gray("<description>")}                 Add a new task
+  ${chalk.yellow("update")} ${chalk.gray("<id> [description]")}         Update task description
+  ${chalk.yellow("delete")} ${chalk.gray("<id>")}                       Delete a task
+  ${chalk.yellow("list")} ${chalk.gray("[todo|in-progress|done]")}      List tasks (optionally filtered by status)
+  ${chalk.yellow("mark-in-progress")} ${chalk.gray("<id>")}             Mark a task as in-progress
+  ${chalk.yellow("mark-done")} ${chalk.gray("<id>")}                    Mark a task as done
 
-Options:
-  --help, -h                        Show help documentation
+${chalk.bold("OPTIONS:")}
+  ${chalk.yellow("--help")}, ${chalk.yellow("-h")}                        Show help documentation
 `);
   }
 
@@ -51,14 +54,13 @@ Options:
       showHelp();
       break;
     case undefined:
-      console.log(
-        "Command not provided. Use --help or -h for usage information.",
-      );
-      process.exitCode = 1;
+      await interactiveMenu();
       break;
     default:
       console.error(
-        `Unknown command: ${command}.\nUse --help or -h for usage information.`,
+        chalk.red(
+          `Unknown command: ${command}.\nUse --help or -h for usage information.`,
+        ),
       );
       process.exitCode = 1;
   }
