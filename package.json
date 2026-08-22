@@ -1,0 +1,36 @@
+{
+  "name": "task-cli",
+  "version": "1.0.0",
+  "description": "A lightweight CLI task manager built in TypeScript",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "prepublishOnly": "pnpm build"
+  },
+  "bin": {
+    "task": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "cli",
+    "task-manager",
+    "todo",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.21.0",
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "env-paths": "^4.0.0"
+  }
+}
