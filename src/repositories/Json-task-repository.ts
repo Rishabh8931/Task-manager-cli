@@ -2,8 +2,10 @@ import envPaths from "env-paths";
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import { type Task } from "../domain/task.js";
+import { isTask, type Task } from "../domain/task.js";
 import { type TaskRepository } from "./task-repositry.js";
+import { StorageAccessError } from "../errors/storage-access.error.js";
+import { StorageCorruptedError } from "../errors/storage-corrupted.error.js";
 
 export class JsonTaskRepository implements TaskRepository {
   private filePath: string;
@@ -16,26 +18,57 @@ export class JsonTaskRepository implements TaskRepository {
 
   // save
   private async save(tasks: Task[]): Promise<void> {
-    const directory = path.dirname(this.filePath);
+    try {
+      const directory = path.dirname(this.filePath);
 
-    await fs.mkdir(directory, { recursive: true });
+      await fs.mkdir(directory, { recursive: true });
 
-    const content = JSON.stringify(tasks, null, 2);
+      const content = JSON.stringify(tasks, null, 2);
 
-    await fs.writeFile(this.filePath, content, "utf-8");
+      await fs.writeFile(this.filePath, content, "utf-8");
+    } catch (error) {
+      throw new StorageAccessError(
+        `Unable to write tasks file: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   // get all tasks from the json file;
   async getAll(): Promise<Task[]> {
+    let content: string;
+
     try {
-      const content = await fs.readFile(this.filePath, "utf-8");
-      return JSON.parse(content) as Task[];
+      content = await fs.readFile(this.filePath, "utf-8");
     } catch (error) {
       if (isFileNotFoundError(error)) {
         return [];
       }
-      throw error;
+      throw new StorageAccessError(
+        `Unable to read tasks file: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
+
+    let data: Task[];
+    try {
+      data = JSON.parse(content);
+    } catch (error) {
+      throw new StorageCorruptedError(
+        "Task storage contains invalid JSON :" +
+          (error instanceof Error ? error.message : String(error)),
+      );
+    }
+
+    if (!Array.isArray(data)) {
+      throw new StorageCorruptedError("Task storage must be an array of tasks");
+    }
+
+    if (!data.every(isTask)) {
+      throw new StorageCorruptedError(
+        "Task storage contains invalid task objects",
+      );
+    }
+
+    return data;
   }
 
   // get by id from the json file;
