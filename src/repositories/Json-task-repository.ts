@@ -13,7 +13,6 @@ export class JsonTaskRepository implements TaskRepository {
   constructor() {
     const paths = envPaths("task-cli").data;
     this.filePath = path.join(paths, "tasks.json");
-    console.log(`JsonTaskRepository file path: ${this.filePath}`);
   }
 
   // save
