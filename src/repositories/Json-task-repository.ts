@@ -6,6 +6,7 @@ import { isTask, type Task } from "../domain/task.js";
 import { type TaskRepository } from "./task-repositry.js";
 import { StorageAccessError } from "../errors/storage-access.error.js";
 import { StorageCorruptedError } from "../errors/storage-corrupted.error.js";
+import { TaskNotFoundError } from "../errors/task-notFound.error.js";
 
 export class JsonTaskRepository implements TaskRepository {
   private filePath: string;
@@ -92,7 +93,7 @@ export class JsonTaskRepository implements TaskRepository {
     const index = tasks.findIndex((t) => t.id === task.id);
 
     if (index === -1) {
-      throw new Error(`Task with id ${task.id} not found`);
+      throw new TaskNotFoundError(task.id);
     }
 
     tasks[index] = task;
@@ -105,7 +106,7 @@ export class JsonTaskRepository implements TaskRepository {
     const index = tasks.findIndex((task) => task.id === id);
 
     if (index === -1) {
-      throw new Error(`Task with id ${id} not found`);
+      throw new TaskNotFoundError(id);
     }
     tasks.splice(index, 1);
     await this.save(tasks);

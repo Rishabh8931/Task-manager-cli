@@ -2,9 +2,10 @@ import type { Task } from "../domain/task.js";
 import type { TaskRepository } from "../repositories/task-repositry.js";
 import { MemoryTaskRepository } from "../repositories/Memory-repository.js";
 import { JsonTaskRepository } from "../repositories/Json-task-repository.js";
+import { TaskNotFoundError } from "../errors/task-notFound.error.js";
 
 class TaskService {
-  constructor(private taskRepository: TaskRepository) {}
+  constructor(private taskRepository: JsonTaskRepository) {}
 
   async createTask(description: string): Promise<Task> {
     const now = new Date().toISOString();
@@ -17,6 +18,44 @@ class TaskService {
     };
     await this.taskRepository.create(newTask);
     return newTask;
+  }
+
+  async getAll(): Promise<Task[]> {
+    return await this.taskRepository.getAll();
+  }
+
+  async deleteTask(id: number): Promise<void> {
+    await this.taskRepository.delete(id);
+  }
+
+  async updateTask(task: Task): Promise<void> {
+    await this.taskRepository.update(task);
+  }
+
+  async getTaskById(id: number): Promise<Task | null> {
+    return await this.taskRepository.getById(id);
+  }
+
+  async markInProgress(id: number): Promise<void> {
+    const task = await this.taskRepository.getById(id);
+    if (!task) {
+      throw new TaskNotFoundError(id);
+    }
+    task.status = "in-progress";
+    await this.taskRepository.update(task);
+  }
+
+  async markDone(id: number): Promise<void> {
+    const task = await this.taskRepository.getById(id);
+
+    if (!task) {
+      throw new TaskNotFoundError(id);
+    }
+
+    task.status = "done";
+    task.updatedAt = new Date().toISOString();
+
+    await this.taskRepository.update(task);
   }
 }
 

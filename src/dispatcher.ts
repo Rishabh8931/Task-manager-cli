@@ -1,4 +1,9 @@
 import { addCommand } from "./commands/add.js";
+import { listCommand } from "./commands/list.js";
+import { deleteCommand } from "./commands/delete.js";
+import { updateCommand } from "./commands/update.js";
+import { markInProgressCommand } from "./commands/mark-in-progress.js";
+import { doneCommand } from "./commands/done.js";
 
 export async function dispatch(args: string[]): Promise<void> {
   const command = args[0];
@@ -28,19 +33,19 @@ Options:
       await addCommand(args[1]);
       break;
     case "update":
-      console.log("Updating item...");
+      await updateCommand(args[1]!, args[2]!);
       break;
     case "delete":
-      console.log("Deleting item...");
+      await deleteCommand(args[1]!);
       break;
     case "list":
-      console.log("Listing items...");
+      await listCommand();
       break;
     case "mark-in-progress":
-      console.log("Marking item as in progress...");
+      await markInProgressCommand(args[1]);
       break;
     case "mark-done":
-      console.log("Marking item as done...");
+      await doneCommand(args[1]);
       break;
 
     case "--help":
