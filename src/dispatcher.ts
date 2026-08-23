@@ -1,6 +1,7 @@
 import { addCommand } from "./commands/add.js";
 import { listCommand } from "./commands/list.js";
 import { deleteCommand } from "./commands/delete.js";
+import { updateCommand } from "./commands/update.js";
 
 export async function dispatch(args: string[]): Promise<void> {
   const command = args[0];
@@ -30,7 +31,7 @@ Options:
       await addCommand(args[1]);
       break;
     case "update":
-      console.log("Updating item...");
+      await updateCommand(args[1]!, args[2]!);
       break;
     case "delete":
       await deleteCommand(args[1]!);

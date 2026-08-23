@@ -2,6 +2,7 @@ import type { Task } from "../domain/task.js";
 import type { TaskRepository } from "../repositories/task-repositry.js";
 import { MemoryTaskRepository } from "../repositories/Memory-repository.js";
 import { JsonTaskRepository } from "../repositories/Json-task-repository.js";
+import { TaskNotFoundError } from "../errors/task-notFound.error.js";
 
 class TaskService {
   constructor(private taskRepository: JsonTaskRepository) {}
@@ -35,7 +36,14 @@ class TaskService {
     return await this.taskRepository.getById(id);
   }
 
-  
+  async markInProgress(id: number): Promise<void> {
+    const task = await this.taskRepository.getById(id);
+    if  (!task) {
+      throw new TaskNotFoundError(id);
+    }
+    task.status = "in-progress";
+    await this.taskRepository.update(task);
+  }
 }
 
 const taskRepository = new JsonTaskRepository();
