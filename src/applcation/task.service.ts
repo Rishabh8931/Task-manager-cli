@@ -4,7 +4,7 @@ import { MemoryTaskRepository } from "../repositories/Memory-repository.js";
 import { JsonTaskRepository } from "../repositories/Json-task-repository.js";
 
 class TaskService {
-  constructor(private taskRepository: TaskRepository) {}
+  constructor(private taskRepository: JsonTaskRepository) {}
 
   async createTask(description: string): Promise<Task> {
     const now = new Date().toISOString();
@@ -19,12 +19,13 @@ class TaskService {
     return newTask;
   }
 
-
   async getAll(): Promise<Task[]> {
-    return  await this.taskRepository.getAll();
+    return await this.taskRepository.getAll();
   }
 
-  
+  async deleteTask(id: number): Promise<void> {
+    await this.taskRepository.delete(id);
+  }
 }
 
 const taskRepository = new JsonTaskRepository();
