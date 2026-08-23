@@ -26,6 +26,16 @@ class TaskService {
   async deleteTask(id: number): Promise<void> {
     await this.taskRepository.delete(id);
   }
+
+  async updateTask(task: Task): Promise<void> {
+    await this.taskRepository.update(task);
+  }
+
+  async getTaskById(id: number): Promise<Task | null> {
+    return await this.taskRepository.getById(id);
+  }
+
+  
 }
 
 const taskRepository = new JsonTaskRepository();
