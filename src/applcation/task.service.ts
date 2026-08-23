@@ -38,10 +38,23 @@ class TaskService {
 
   async markInProgress(id: number): Promise<void> {
     const task = await this.taskRepository.getById(id);
-    if  (!task) {
+    if (!task) {
       throw new TaskNotFoundError(id);
     }
     task.status = "in-progress";
+    await this.taskRepository.update(task);
+  }
+
+  async markDone(id: number): Promise<void> {
+    const task = await this.taskRepository.getById(id);
+
+    if (!task) {
+      throw new TaskNotFoundError(id);
+    }
+
+    task.status = "done";
+    task.updatedAt = new Date().toISOString();
+
     await this.taskRepository.update(task);
   }
 }
