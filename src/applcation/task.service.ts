@@ -18,6 +18,13 @@ class TaskService {
     await this.taskRepository.create(newTask);
     return newTask;
   }
+
+
+  async getAll(): Promise<Task[]> {
+    return  await this.taskRepository.getAll();
+  }
+
+  
 }
 
 const taskRepository = new JsonTaskRepository();

@@ -1,4 +1,5 @@
 import { addCommand } from "./commands/add.js";
+import { listCommand } from "./commands/list.js";
 
 export async function dispatch(args: string[]): Promise<void> {
   const command = args[0];
@@ -34,7 +35,7 @@ Options:
       console.log("Deleting item...");
       break;
     case "list":
-      console.log("Listing items...");
+      await listCommand();
       break;
     case "mark-in-progress":
       console.log("Marking item as in progress...");
