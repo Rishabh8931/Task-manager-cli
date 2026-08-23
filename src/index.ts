@@ -3,6 +3,7 @@
 import { dispatch } from "./dispatcher.js";
 import { StorageAccessError } from "./errors/storage-access.error.js";
 import { StorageCorruptedError } from "./errors/storage-corrupted.error.js";
+import { TaskNotFoundError } from "./errors/task-notFound.error.js";
 
 const args = process.argv.slice(2);
 
@@ -19,6 +20,8 @@ function handleCliError(error: unknown): void {
   } else if (error instanceof StorageCorruptedError) {
     console.error("Error: The task storage is corrupted.");
     process.exitCode = 1;
+  } else if (error instanceof TaskNotFoundError) {
+    console.error(`Error: ${error.message}`);
   } else {
     console.error("An unknown error occurred.");
     process.exitCode = 1;
