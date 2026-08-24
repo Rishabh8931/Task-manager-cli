@@ -5,4 +5,5 @@ export const symbols = {
   todo: "○",
   inProgress: "◐",
   done: "✓",
+  connector: "│",
 } as const;
