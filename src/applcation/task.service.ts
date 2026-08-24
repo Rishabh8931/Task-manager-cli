@@ -29,6 +29,7 @@ class TaskService {
   }
 
   async updateTask(task: Task): Promise<void> {
+    task.updatedAt = new Date().toISOString();
     await this.taskRepository.update(task);
   }
 
@@ -42,6 +43,7 @@ class TaskService {
       throw new TaskNotFoundError(id);
     }
     task.status = "in-progress";
+    task.updatedAt = new Date().toISOString();
     await this.taskRepository.update(task);
   }
 
