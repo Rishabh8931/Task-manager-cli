@@ -1,8 +1,10 @@
 import { taskService } from "../applcation/task.service.js";
+import { error, success } from "../ui/message.js";
+import { renderTasks } from "../ui/renderer.js";
 
 export async function doneCommand(id: string | undefined): Promise<void> {
   if (!id) {
-    console.error("Error: Task ID is required.");
+    error("Task ID is required.");
     process.exitCode = 1;
     return;
   }
@@ -10,12 +12,13 @@ export async function doneCommand(id: string | undefined): Promise<void> {
   const taskId = Number(id);
 
   if (!Number.isInteger(taskId)) {
-    console.error("Error: Task ID must be a number.");
+    error("Task ID must be a number.");
     process.exitCode = 1;
     return;
   }
 
   await taskService.markDone(taskId);
 
-  console.log(`Task ${taskId} marked as done.`);
+  success(`Task ${taskId} marked as done.`);
+  renderTasks([{ id: taskId, description: "", status: "done" }], "single");
 }

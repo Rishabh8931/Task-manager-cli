@@ -1,20 +1,20 @@
 import { taskService } from "../applcation/task.service.js";
 import { TaskNotFoundError } from "../errors/task-notFound.error.js";
+import { error, success } from "../ui/message.js";
+import { renderTasks } from "../ui/renderer.js";
 
 export async function updateCommand(
   id: string,
   description: string,
 ): Promise<void> {
   if (!id || isNaN(Number(id)) || id == "") {
-    console.error("Invalid task ID. Please provide a valid numeric ID.");
+    error("Invalid task ID. Please provide a valid number.");
     process.exitCode = 1;
     return;
   }
 
   if (!description || description.trim() === "") {
-    console.error(
-      "Invalid description. Please provide a non-empty description.",
-    );
+    error("Invalid description. Please provide a non-empty description.");
     process.exitCode = 1;
     return;
   }
@@ -22,7 +22,7 @@ export async function updateCommand(
   const taskId = Number(id);
 
   if (!Number.isInteger(taskId) || taskId < 0) {
-    console.error("Error: Task ID must be a number");
+    error("Error: Task ID must be a positive number");
     process.exitCode = 1;
     return;
   }
@@ -36,6 +36,7 @@ export async function updateCommand(
   task.description = description.trim();
 
   await taskService.updateTask(task);
-  console.log(`Task with ID ${taskId} has been updated.`);
+  success(`Task  ${taskId}  updated.`);
+  renderTasks(task ? [task] : [], "single");
   return;
 }

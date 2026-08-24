@@ -4,8 +4,8 @@ export interface Task {
   id: number;
   description: string;
   status: TaskStatus;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export function isTask(value: unknown): value is Task {

@@ -1,6 +1,7 @@
 import { type Task } from "../domain/task.js";
 import { taskService } from "../applcation/task.service.js";
 import { error, success } from "../ui/message.js";
+import { renderTasks } from "../ui/renderer.js";
 
 export async function addCommand(task: string | undefined): Promise<void> {
   if (!task || task.trim() === "") {
@@ -11,4 +12,5 @@ export async function addCommand(task: string | undefined): Promise<void> {
 
   const newTask: Task = await taskService.createTask(task.trim());
   success(`Task ${newTask.id} created`);
+  renderTasks(newTask ? [newTask] : [], "single");
 }

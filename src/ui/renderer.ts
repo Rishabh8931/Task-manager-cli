@@ -189,12 +189,14 @@ function renderCompactTable(tasks: Task[]): void {
 // ================================================
 // render tasks
 // ================================================
-export function renderTasks(tasks: Task[]): void {
+export function renderTasks(tasks: Task[], flag?: string): void {
   const stats = getStatistics(tasks);
 
   console.log();
-  renderHeader(stats);
-  console.log();
+  if (!flag) {
+    renderHeader(stats);
+    console.log();
+  }
 
   if (tasks.length === 0) {
     renderEmptyState();
@@ -208,5 +210,3 @@ export function renderTasks(tasks: Task[]): void {
 
   console.log();
 }
-
-renderTasks(tasks);
