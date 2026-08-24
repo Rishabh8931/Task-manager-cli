@@ -21,7 +21,7 @@ export async function updateCommand(
 
   const taskId = Number(id);
 
-  if (!Number.isInteger(taskId) || taskId <= 0) {
+  if (!Number.isInteger(taskId) || taskId < 0) {
     console.error("Error: Task ID must be a number");
     process.exitCode = 1;
     return;

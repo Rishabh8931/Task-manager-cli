@@ -22,6 +22,7 @@ function handleCliError(error: unknown): void {
     process.exitCode = 1;
   } else if (error instanceof TaskNotFoundError) {
     console.error(`Error: ${error.message}`);
+    process.exitCode = 1;
   } else {
     console.error("An unknown error occurred.");
     process.exitCode = 1;
