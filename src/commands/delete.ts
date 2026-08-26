@@ -1,8 +1,9 @@
 import { taskService } from "../applcation/task.service.js";
+import { error, success } from "../ui/message.js";
 
 export async function deleteCommand(id: string): Promise<void> {
   if (!id || isNaN(Number(id))) {
-    console.error("Invalid task ID. Please provide a valid numeric ID.");
+    error("Invalid task ID. Please provide a valid numeric ID.");
     process.exitCode = 1;
     return;
   }
@@ -10,11 +11,11 @@ export async function deleteCommand(id: string): Promise<void> {
   const taskId = Number(id);
 
   if (!Number.isInteger(taskId) || taskId < 0) {
-    console.error("Error: Task ID must be a number");
+    error("Error: Task ID must be a number");
     process.exitCode = 1;
     return;
   }
 
   await taskService.deleteTask(taskId);
-  console.log(`Task with ID ${taskId} has been deleted.`);
+  success(`Task  ${taskId}  deleted.`);
 }
