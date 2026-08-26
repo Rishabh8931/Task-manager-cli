@@ -55,10 +55,32 @@ export function wrapText(text: string, maxWidth: number): string[] {
 
   const words = text.split(/\s+/);
   const lines: string[] = [];
-
   let currentLine = "";
 
   for (const word of words) {
+    // If the word itself is larger than maxWidth,
+    // split it into maxWidth-sized chunks.
+    if (word.length > maxWidth) {
+      // Push whatever is currently in the line first
+      if (currentLine) {
+        lines.push(currentLine);
+        currentLine = "";
+      }
+
+      for (let i = 0; i < word.length; i += maxWidth) {
+        const chunk = word.slice(i, i + maxWidth);
+
+        // Last chunk can become the current line
+        if (chunk.length < maxWidth) {
+          currentLine = chunk;
+        } else {
+          lines.push(chunk);
+        }
+      }
+
+      continue;
+    }
+
     if (!currentLine) {
       currentLine = word;
       continue;

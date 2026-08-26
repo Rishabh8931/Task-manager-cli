@@ -13,6 +13,7 @@ import {
 import { getLayoutMode, type LayoutMode } from "./layout.js";
 import { getTerminalWidth } from "./terminal.js";
 import { theme } from "./themes.js";
+import { shouldUseColor } from "../utils/shouldUseColor.js";
 
 // ================================================
 // constants
@@ -21,26 +22,35 @@ import { theme } from "./themes.js";
 const MIN_TABLE_WIDTH = 60;
 const DEFAULT_TERMINAL_WIDTH = 80;
 
-// ================================================
-// utility
-// ================================================
+//===============================================
+// render tasks in piped or non-TTY mode (no color)
+//===============================================
 
-function getSafeTerminalWidth(): number {
-  const width = getTerminalWidth();
+function renderPipedTasks(tasks: Task[], terminalWidth: number): void {
+  const narrow = terminalWidth < 60;
 
-  return Math.max(width, 20);
-}
+  console.log(`Task ID \t| Description \t| Status`);
+  console.log(`-----------------------------------------------`);
+  console.log();
 
-function stripAnsi(value: string): string {
-  return value.replace(
-    // eslint-disable-next-line no-control-regex
-    /\u001B(?:[@-_][0-?]*[ -/]*[@-~]|\[[0-?]*[ -/]*[@-~])/g,
-    "",
-  );
-}
+  for (const task of tasks) {
+    const taskIdWidth = task.id.toString().length + 2; // +2 for the "# " prefix
+    const statusWidth = task.status.length + 2; // +2 for the spaces around the status
+    const descriptionWidth = Math.max(
+      15,
+      terminalWidth - taskIdWidth - statusWidth - 10,
+    );
+    const truncatedDescription = wrapText(task.description, 20);
+    console.log(
+      `${task.id} \t\t ${truncatedDescription[0]} \t\t ${task.status}`,
+    );
 
-function visibleLength(value: string): number {
-  return stripAnsi(value).length;
+    for (const line of truncatedDescription.slice(1)) {
+      console.log(`\t\t ${line}`);
+    }
+
+    console.log();
+  }
 }
 
 // ================================================
@@ -264,6 +274,12 @@ export function renderTasks(tasks: Task[], flag?: string): void {
   const layout = getLayoutMode(terminalWidth);
 
   console.log();
+
+  // if the output is being piped, render in a simple format without color
+  if (!shouldUseColor()) {
+    renderPipedTasks(tasks, terminalWidth);
+    return;
+  }
 
   if (!flag) {
     renderHeader(stats, layout, terminalWidth);

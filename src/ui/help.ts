@@ -1,8 +1,35 @@
 import boxen from "boxen";
 import { colors } from "./colors.js";
 import chalk from "chalk";
+import { shouldUseColor } from "../utils/shouldUseColor.js";
 
 export function renderHelp(): void {
+  // ================================================
+  // render help message in piped mode (no color)
+  // ================================================
+
+  if (!shouldUseColor()) {
+    console.log();
+    console.log("A fast developer-focused task manager.");
+    console.log();
+
+    console.log("COMMANDS");
+    console.log();
+    console.log(command("add <description>", "Add a new task"));
+    console.log(command("list", "List all tasks"));
+    console.log(command("update <id> <text>", "Update a task"));
+    console.log(command("mark-in-progress <id>", "Start a task"));
+    console.log(command("done <id>", "Complete a task"));
+    console.log(command("delete <id>", "Delete a task"));
+    console.log();
+
+    return;
+  }
+
+  // ================================================
+  // render help message in interactive mode (with color)
+  // ================================================
+
   const content = [
     chalk.yellowBright("A fast developer-focused task manager."),
 
