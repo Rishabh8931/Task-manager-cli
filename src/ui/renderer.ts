@@ -3,7 +3,13 @@ import chalk from "chalk";
 import Table from "cli-table3";
 
 import type { Task, TaskStatus } from "../domain/task.js";
-import { formatStatus, getStatistics, type Statistics } from "./formatter.js";
+import {
+  formatStatus,
+  getStatistics,
+  type Statistics,
+  truncate,
+  wrapText,
+} from "./formatter.js";
 import { getLayoutMode, type LayoutMode } from "./layout.js";
 import { getTerminalWidth } from "./terminal.js";
 import { theme } from "./themes.js";
@@ -35,43 +41,6 @@ function stripAnsi(value: string): string {
 
 function visibleLength(value: string): number {
   return stripAnsi(value).length;
-}
-
-// ================================================
-// text wrapping
-// ================================================
-
-function wrapText(text: string, maxWidth: number): string[] {
-  if (maxWidth <= 0) {
-    return [text];
-  }
-
-  const words = text.split(/\s+/);
-  const lines: string[] = [];
-
-  let currentLine = "";
-
-  for (const word of words) {
-    if (!currentLine) {
-      currentLine = word;
-      continue;
-    }
-
-    const candidate = `${currentLine} ${word}`;
-
-    if (candidate.length <= maxWidth) {
-      currentLine = candidate;
-    } else {
-      lines.push(currentLine);
-      currentLine = word;
-    }
-  }
-
-  if (currentLine) {
-    lines.push(currentLine);
-  }
-
-  return lines.length > 0 ? lines : [""];
 }
 
 // ================================================
@@ -181,7 +150,12 @@ function renderSpaciousTasks(tasks: Task[], terminalWidth: number): void {
 
     const id = theme.colors.muted(`#${task.id}`);
 
-    const descriptionLines = wrapText(task.description, descriptionWidth);
+    // const descriptionLines = wrapText(task.description, descriptionWidth);
+    const description = truncate(task.description, descriptionWidth - 5);
+
+    /*
+
+//  wrapping texts description to fit within the descriptionWidth
 
     if (narrow) {
       console.log(
@@ -202,6 +176,12 @@ function renderSpaciousTasks(tasks: Task[], terminalWidth: number): void {
         console.log(`        ${theme.colors.primary(line)}`);
       }
     }
+
+    */
+
+    console.log(
+      `  ${coloredSymbol}  ${id}  ${theme.colors.primary(description)}  ${coloredStatus}`,
+    );
 
     if (i < tasks.length - 1) {
       console.log(theme.colors.muted(`  ${theme.symbols.connector}`));
@@ -258,7 +238,12 @@ function renderCompactTable(tasks: Task[], terminalWidth: number): void {
   });
 
   for (const task of tasks) {
-    table.push([`#${task.id}`, task.description, formatStatus(task.status)]);
+    const truncatedDescription = truncate(task.description, taskWidth - 5);
+    table.push([
+      `#${task.id}`,
+      truncatedDescription,
+      formatStatus(task.status),
+    ]);
   }
 
   console.log(table.toString());

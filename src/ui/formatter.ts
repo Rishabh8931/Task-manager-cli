@@ -29,3 +29,54 @@ export function getStatistics(tasks: Task[]): Statistics {
     done: tasks.filter((task) => task.status === "done").length,
   };
 }
+
+// ================================================
+// text truncation
+// ================================================
+
+export function truncate(text: string, maxLength: number): string {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  if (maxLength <= 3) {
+    return text.substring(0, maxLength);
+  }
+  return text.substring(0, maxLength - 3) + "...";
+}
+
+// ================================================
+// text wrapping
+// ================================================
+
+export function wrapText(text: string, maxWidth: number): string[] {
+  if (maxWidth <= 0) {
+    return [text];
+  }
+
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+
+  let currentLine = "";
+
+  for (const word of words) {
+    if (!currentLine) {
+      currentLine = word;
+      continue;
+    }
+
+    const candidate = `${currentLine} ${word}`;
+
+    if (candidate.length <= maxWidth) {
+      currentLine = candidate;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines.length > 0 ? lines : [""];
+}
