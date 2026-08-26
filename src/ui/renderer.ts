@@ -4,85 +4,117 @@ import Table from "cli-table3";
 
 import type { Task, TaskStatus } from "../domain/task.js";
 import { formatStatus, getStatistics, type Statistics } from "./formatter.js";
+import { getLayoutMode, type LayoutMode } from "./layout.js";
+import { getTerminalWidth } from "./terminal.js";
 import { theme } from "./themes.js";
 
-const tasks: Task[] = [
-  {
-    id: 1,
-    description: "Learn TypeScript",
-    status: "todo",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 2,
-    description: "Build a simple CLI app",
-    status: "in-progress",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 3,
-    description: "Deploy the app",
-    status: "done",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 4,
-    description: "Write documentation",
-    status: "todo",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 5,
-    description: "Fix bugs",
-    status: "in-progress",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  // {
-  //   id: 6,
-  //   description: "Refactor code",
-  //   status: "done",
-  //   createdAt: new Date().toISOString(),
-  //   updatedAt: new Date().toISOString(),
-  // },
-  // {
-  //   id: 7,
-  //   description: "Add new features",
-  //   status: "todo",
-  //   createdAt: new Date().toISOString(),
-  //   updatedAt: new Date().toISOString(),
-  // },
-];
+// ================================================
+// constants
+// ================================================
+
+const MIN_TABLE_WIDTH = 60;
+const DEFAULT_TERMINAL_WIDTH = 80;
+
+// ================================================
+// utility
+// ================================================
+
+function getSafeTerminalWidth(): number {
+  const width = getTerminalWidth();
+
+  return Math.max(width, 20);
+}
+
+function stripAnsi(value: string): string {
+  return value.replace(
+    // eslint-disable-next-line no-control-regex
+    /\u001B(?:[@-_][0-?]*[ -/]*[@-~]|\[[0-?]*[ -/]*[@-~])/g,
+    "",
+  );
+}
+
+function visibleLength(value: string): number {
+  return stripAnsi(value).length;
+}
+
+// ================================================
+// text wrapping
+// ================================================
+
+function wrapText(text: string, maxWidth: number): string[] {
+  if (maxWidth <= 0) {
+    return [text];
+  }
+
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+
+  let currentLine = "";
+
+  for (const word of words) {
+    if (!currentLine) {
+      currentLine = word;
+      continue;
+    }
+
+    const candidate = `${currentLine} ${word}`;
+
+    if (candidate.length <= maxWidth) {
+      currentLine = candidate;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines.length > 0 ? lines : [""];
+}
 
 // ================================================
 // render header
 // ================================================
 
-function renderHeader(stats: Statistics): void {
-  const statistics = [
-    `${chalk.bold.cyanBright("Total:")} ${chalk.bold(stats.total)}`,
-    `${chalk.bold.red("Todo:")} ${chalk.bold(stats.todo)}`,
-    `${chalk.bold.yellowBright("In Progress:")} ${chalk.bold(stats.inProgress)}`,
-    `${chalk.bold.greenBright("Done:")} ${chalk.bold(stats.done)}`,
-  ].join("  ");
+function renderHeader(
+  stats: Statistics,
+  layout: LayoutMode,
+  terminalWidth: number,
+): void {
+  const total = `${chalk.bold.cyanBright("Total:")} ${chalk.bold(stats.total)}`;
+  const todo = `${chalk.bold.red("Todo:")} ${chalk.bold(stats.todo)}`;
+  const inProgress = `${chalk.bold.yellowBright("In Progress:")} ${chalk.bold(stats.inProgress)}`;
+  const done = `${chalk.bold.greenBright("Done:")} ${chalk.bold(stats.done)}`;
+
+  let statistics: string;
+
+  if (layout === "compact" || terminalWidth < 50) {
+    statistics = [total, todo, inProgress, done].join("\n");
+  } else {
+    statistics = [total, todo, inProgress, done].join("  ");
+  }
 
   console.log(
-    boxen(`${statistics}`, {
+    boxen(statistics, {
       padding: {
         top: 1,
         bottom: 1,
         left: 1,
         right: 1,
       },
-      height: 5,
-      title: chalk.bold.underlineBlueBright.redBright("TASKS"),
+
+      title: chalk.bold("TASKS"),
       titleAlignment: "center",
+
       borderStyle: "round",
       borderColor: "greenBright",
+
+      width:
+        layout === "compact"
+          ? Math.min(terminalWidth - 2, 40)
+          : Math.min(terminalWidth - 2, 80),
     }),
   );
 }
@@ -90,19 +122,18 @@ function renderHeader(stats: Statistics): void {
 // ================================================
 // render empty state
 // ================================================
+
 function renderEmptyState(): void {
   console.log();
   console.log(`  ${chalk.redBright("No tasks yet.")}`);
-
   console.log(
     `  ${chalk.redBright('Use "task add <description>" to create one.')}`,
   );
-
   console.log();
 }
 
 // ================================================
-// render spacious tasks
+// status
 // ================================================
 
 function colorStatus(status: TaskStatus, value: string): string {
@@ -118,19 +149,59 @@ function colorStatus(status: TaskStatus, value: string): string {
   }
 }
 
-function renderSpaciousTasks(tasks: Task[]): void {
+// ================================================
+// render normal / spacious tasks
+// ================================================
+
+function renderSpaciousTasks(tasks: Task[], terminalWidth: number): void {
+  const narrow = terminalWidth < 60;
+
+  const symbolWidth = 3;
+  const idWidth = 6;
+  const statusWidth = 14;
+
+  const descriptionWidth = Math.max(
+    15,
+    terminalWidth - symbolWidth - idWidth - statusWidth - 10,
+  );
+
   for (let i = 0; i < tasks.length; i++) {
     const task = tasks[i];
 
-    const [symbol, ...status] = formatStatus(task!.status).split(" ");
+    if (!task) continue;
 
-    const coloredStatus = colorStatus(task!.status, status.join("-"));
-    const coloredSymbol = colorStatus(task!.status, symbol!);
+    const formattedStatus = formatStatus(task.status);
+    const [symbol, ...statusParts] = formattedStatus.split(" ");
 
-    const id = theme.colors.muted(`#${task!.id}`);
-    const description = theme.colors.primary(task!.description);
+    const statusText = statusParts.join(" ");
 
-    console.log(`  ${coloredSymbol}  ${id}  ${description}  ${coloredStatus}`);
+    const coloredStatus = colorStatus(task.status, statusText);
+
+    const coloredSymbol = colorStatus(task.status, symbol!);
+
+    const id = theme.colors.muted(`#${task.id}`);
+
+    const descriptionLines = wrapText(task.description, descriptionWidth);
+
+    if (narrow) {
+      console.log(
+        `  ${coloredSymbol}  ${id}  ${theme.colors.primary(descriptionLines[0]!)}`,
+      );
+
+      for (const line of descriptionLines.slice(1)) {
+        console.log(`              ${theme.colors.primary(line)}`);
+      }
+
+      console.log(`            ${coloredStatus}`);
+    } else {
+      console.log(
+        `  ${coloredSymbol}  ${id}  ${theme.colors.primary(descriptionLines[0]!)}  ${coloredStatus}`,
+      );
+
+      for (const line of descriptionLines.slice(1)) {
+        console.log(`        ${theme.colors.primary(line)}`);
+      }
+    }
 
     if (i < tasks.length - 1) {
       console.log(theme.colors.muted(`  ${theme.symbols.connector}`));
@@ -138,14 +209,24 @@ function renderSpaciousTasks(tasks: Task[]): void {
   }
 }
 
-// ===============================================
+// ================================================
 // render compact table
-// ===============================================
+// ================================================
 
-function renderCompactTable(tasks: Task[]): void {
-  // creating table with cli-table3
+function renderCompactTable(tasks: Task[], terminalWidth: number): void {
+  const availableWidth = Math.max(MIN_TABLE_WIDTH, terminalWidth - 2);
+
+  const idWidth = 6;
+  const statusWidth = 16;
+
+  const taskWidth = Math.max(20, availableWidth - idWidth - statusWidth - 6);
+
   const table = new Table({
+    colWidths: [idWidth, taskWidth, statusWidth],
+
     head: [chalk.gray("ID"), chalk.gray("TASK"), chalk.gray("STATUS")],
+
+    wordWrap: true,
 
     style: {
       head: [],
@@ -155,13 +236,13 @@ function renderCompactTable(tasks: Task[]): void {
     chars: {
       top: "─",
       "top-mid": "┬",
-      "top-left": "╭",
-      "top-right": "╮",
+      "top-left": "┌",
+      "top-right": "┐",
 
       bottom: "─",
       "bottom-mid": "┴",
-      "bottom-left": "╰",
-      "bottom-right": "╯",
+      "bottom-left": "└",
+      "bottom-right": "┘",
 
       left: "│",
       "left-mid": "├",
@@ -177,35 +258,59 @@ function renderCompactTable(tasks: Task[]): void {
   });
 
   for (const task of tasks) {
-    table.push([
-      `#${task.id}`,
-      task.description,
-      `${formatStatus(task.status)}`,
-    ]);
+    table.push([`#${task.id}`, task.description, formatStatus(task.status)]);
   }
+
   console.log(table.toString());
 }
 
 // ================================================
 // render tasks
 // ================================================
+
 export function renderTasks(tasks: Task[], flag?: string): void {
   const stats = getStatistics(tasks);
 
+  const terminalWidth = Math.max(
+    getTerminalWidth() || DEFAULT_TERMINAL_WIDTH,
+    20,
+  );
+
+  const layout = getLayoutMode(terminalWidth);
+
   console.log();
+
   if (!flag) {
-    renderHeader(stats);
+    renderHeader(stats, layout, terminalWidth);
+
     console.log();
   }
 
   if (tasks.length === 0) {
     renderEmptyState();
+    return;
   }
 
-  if (tasks.length <= 5) {
-    renderSpaciousTasks(tasks);
-  } else {
-    renderCompactTable(tasks);
+  switch (layout) {
+    case "compact":
+      renderSpaciousTasks(tasks, terminalWidth);
+      break;
+
+    case "normal":
+      if (tasks.length <= 5) {
+        renderSpaciousTasks(tasks, terminalWidth);
+      } else {
+        renderCompactTable(tasks, terminalWidth);
+      }
+      break;
+
+    case "wide":
+      if (tasks.length <= 5) {
+        renderSpaciousTasks(tasks, terminalWidth);
+      } else {
+        renderCompactTable(tasks, terminalWidth);
+      }
+      break;
   }
 
   console.log();
