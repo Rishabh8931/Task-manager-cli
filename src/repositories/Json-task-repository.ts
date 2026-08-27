@@ -111,6 +111,11 @@ export class JsonTaskRepository implements TaskRepository {
     tasks.splice(index, 1);
     await this.save(tasks);
   }
+
+  // delete all tasks in the json file;
+  async deleteAll(): Promise<void> {
+    await this.save([]);
+  }
 }
 
 function isFileNotFoundError(error: unknown): error is NodeJS.ErrnoException {

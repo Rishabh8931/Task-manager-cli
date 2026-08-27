@@ -33,4 +33,8 @@ export class MemoryTaskRepository implements TaskRepository {
     }
     this.tasks.splice(index, 1);
   }
+
+  async deleteAll(): Promise<void> {
+    this.tasks = [];
+  }
 }

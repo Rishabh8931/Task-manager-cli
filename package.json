@@ -10,7 +10,7 @@
     "build": "tsc"
   },
   "bin": {
-    "task": "./dist/index.js"
+    "tsk": "./dist/index.js"
   },
   "keywords": [],
   "author": "",
