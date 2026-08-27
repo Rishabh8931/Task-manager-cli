@@ -13,22 +13,35 @@ export async function dispatch(args: string[]): Promise<void> {
     case "add":
       await addCommand(args[1]);
       break;
-    case "update":
+    case "updt":
+      case "update":
+        case "-u":
       await updateCommand(args[1]!, args[2]!);
       break;
-    case "delete":
+    case "-d":
+      case "delete":
+        case "del":
       await deleteCommand(args[1]!);
       break;
     case "list":
+      case "ls":
+        case "-l":
       await listCommand();
       break;
     case "mark-in-progress":
+      case "mark-ip":
+        case "-ip":
       await markInProgressCommand(args[1]);
       break;
     case "mark-done":
+      case "mark-d":
+        case "done":
       await doneCommand(args[1]);
       break;
     case "delete-all":
+      case "del-all":
+        case "-da":
+          
       await deleteAllCommand();
       break;
 
