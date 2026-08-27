@@ -19,3 +19,8 @@ export async function deleteCommand(id: string): Promise<void> {
   await taskService.deleteTask(taskId);
   success(`Task  ${taskId}  deleted.`);
 }
+
+export async function deleteAllCommand(): Promise<void> {
+  await taskService.deleteAllTask();
+  success("All tasks deleted.");
+}

@@ -6,4 +6,5 @@ export interface TaskRepository {
   create(task: Task): Promise<void>;
   update(task: Task): Promise<void>;
   delete(id: number): Promise<void>;
+  deleteAll(): Promise<void>;
 }

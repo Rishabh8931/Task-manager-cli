@@ -1,6 +1,6 @@
 import { addCommand } from "./commands/add.js";
 import { listCommand } from "./commands/list.js";
-import { deleteCommand } from "./commands/delete.js";
+import { deleteCommand, deleteAllCommand } from "./commands/delete.js";
 import { updateCommand } from "./commands/update.js";
 import { markInProgressCommand } from "./commands/mark-in-progress.js";
 import { doneCommand } from "./commands/done.js";
@@ -27,6 +27,9 @@ export async function dispatch(args: string[]): Promise<void> {
       break;
     case "mark-done":
       await doneCommand(args[1]);
+      break;
+    case "delete-all":
+      await deleteAllCommand();
       break;
 
     case "--help":

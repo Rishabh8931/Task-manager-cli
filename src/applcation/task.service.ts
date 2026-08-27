@@ -7,6 +7,9 @@ import { TaskNotFoundError } from "../errors/task-notFound.error.js";
 class TaskService {
   constructor(private taskRepository: JsonTaskRepository) {}
 
+  // ========================================
+  // createTask method implementation
+  // =========================================
   async createTask(description: string): Promise<Task> {
     const now = new Date().toISOString();
     const newTask: Task = {
@@ -20,22 +23,40 @@ class TaskService {
     return newTask;
   }
 
+  // ========================================
+  // getAll method implementation
+  // =========================================
   async getAll(): Promise<Task[]> {
     return await this.taskRepository.getAll();
   }
 
+  // ========================================
+  // deleteTask method implementation
+  // =========================================
   async deleteTask(id: number): Promise<void> {
     await this.taskRepository.delete(id);
   }
+
+  // ========================================
+  // updateTask method implementation
+  // =========================================
 
   async updateTask(task: Task): Promise<void> {
     task.updatedAt = new Date().toISOString();
     await this.taskRepository.update(task);
   }
 
+  // ========================================
+  // getTaskById method implementation
+  // =========================================
+
   async getTaskById(id: number): Promise<Task | null> {
     return await this.taskRepository.getById(id);
   }
+
+  // ========================================
+  // markInProgress method implementation
+  // =========================================
 
   async markInProgress(id: number): Promise<void> {
     const task = await this.taskRepository.getById(id);
@@ -47,6 +68,9 @@ class TaskService {
     await this.taskRepository.update(task);
   }
 
+  // ========================================
+  // markDone method implementation
+  // =========================================
   async markDone(id: number): Promise<void> {
     const task = await this.taskRepository.getById(id);
 
@@ -58,6 +82,13 @@ class TaskService {
     task.updatedAt = new Date().toISOString();
 
     await this.taskRepository.update(task);
+  }
+
+  // ========================================
+  // deleteAllTask method implementation
+  // =========================================
+  async deleteAllTask(): Promise<void> {
+    await this.taskRepository.deleteAll();
   }
 }
 
